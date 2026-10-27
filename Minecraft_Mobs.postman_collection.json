@@ -1,0 +1,391 @@
+{
+  "info": {
+    "name": "API Mobs de Minecraft",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/login",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "login"
+          ]
+        },
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"usuario\": \"profe\",\n  \"clave\": \"cloud2026\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.environment.set('token', pm.response.json().token);",
+              "pm.collectionVariables.set('token', pm.response.json().token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Crear mob - Creeper",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/mobs",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "mobs"
+          ]
+        },
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Creeper\",\n  \"tipo\": \"hostil\",\n  \"vida\": 20,\n  \"dano\": 49,\n  \"dimension\": \"overworld\"\n}"
+        }
+      }
+    },
+    {
+      "name": "3. Crear mob - Vaca",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/mobs",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "mobs"
+          ]
+        },
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Vaca\",\n  \"tipo\": \"pasivo\",\n  \"vida\": 10,\n  \"dano\": 0,\n  \"dimension\": \"overworld\"\n}"
+        }
+      }
+    },
+    {
+      "name": "4. Listar mobs",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/mobs",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "mobs"
+          ]
+        },
+        "auth": {
+          "type": "noauth"
+        }
+      }
+    },
+    {
+      "name": "5. Consultar mob por id",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/mobs/1",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "mobs",
+            "1"
+          ]
+        },
+        "auth": {
+          "type": "noauth"
+        }
+      }
+    },
+    {
+      "name": "6. Actualizar mob (Creeper cargado)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/mobs/1",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "mobs",
+            "1"
+          ]
+        },
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Creeper cargado\",\n  \"tipo\": \"hostil\",\n  \"vida\": 20,\n  \"dano\": 97,\n  \"dimension\": \"overworld\"\n}"
+        }
+      }
+    },
+    {
+      "name": "7. Eliminar mob (Vaca)",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/mobs/2",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "mobs",
+            "2"
+          ]
+        },
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "8. Listar mobs (el Creeper permanece)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/mobs",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "mobs"
+          ]
+        },
+        "auth": {
+          "type": "noauth"
+        }
+      }
+    },
+    {
+      "name": "9. Filtrar mobs hostiles del overworld",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/mobs?tipo=hostil&dimension=overworld",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "mobs"
+          ],
+          "query": [
+            {
+              "key": "tipo",
+              "value": "hostil"
+            },
+            {
+              "key": "dimension",
+              "value": "overworld"
+            }
+          ]
+        },
+        "auth": {
+          "type": "noauth"
+        }
+      }
+    },
+    {
+      "name": "ERROR 400 - Datos invalidos",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/mobs",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "mobs"
+          ]
+        },
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Oveja\",\n  \"tipo\": \"pasivo\",\n  \"vida\": -5,\n  \"dano\": 3,\n  \"dimension\": \"luna\"\n}"
+        }
+      }
+    },
+    {
+      "name": "ERROR 401 - Crear sin token",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/mobs",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "mobs"
+          ]
+        },
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Zombie\",\n  \"tipo\": \"hostil\",\n  \"vida\": 20,\n  \"dano\": 3,\n  \"dimension\": \"overworld\"\n}"
+        }
+      }
+    },
+    {
+      "name": "ERROR 404 - Id inexistente",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/mobs/999",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "mobs",
+            "999"
+          ]
+        },
+        "auth": {
+          "type": "noauth"
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:5000"
+    },
+    {
+      "key": "token",
+      "value": ""
+    }
+  ]
+}

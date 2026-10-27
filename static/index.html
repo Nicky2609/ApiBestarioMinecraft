@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bestiario de Minecraft</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cielo: #7ec0ee;
+    --pasto: #5d9b2f;
+    --pasto-osc: #3f6e1e;
+    --tierra: #866043;
+    --tierra-osc: #5e4230;
+    --piedra: #8b8b8b;
+    --piedra-osc: #555;
+    --panel: #c6c6c6;
+    --panel-borde-claro: #fff;
+    --panel-borde-osc: #555;
+    --texto: #3f3f3f;
+    --boton: #6f6f6f;
+    --pasivo: #55c02e;
+    --neutral: #e9b824;
+    --hostil: #d63a2c;
+    --jefe: #9b3ccf;
+    --overworld: #4f8a2b;
+    --nether: #8a1f1f;
+    --end: #2b2440;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'VT323', monospace;
+    font-size: 22px;
+    color: var(--texto);
+    background:
+      linear-gradient(var(--cielo), #b8dcf5 260px, transparent 260px),
+      repeating-linear-gradient(90deg, var(--tierra) 0 32px, var(--tierra-osc) 32px 36px, var(--tierra) 36px 64px),
+      var(--tierra);
+    min-height: 100vh;
+  }
+  /* ---------- Cabecera ---------- */
+  header {
+    text-align: center;
+    padding: 34px 16px 0;
+  }
+  h1 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(20px, 4.5vw, 42px);
+    color: #fff;
+    margin: 0;
+    text-shadow: 4px 4px 0 #3f3f3f;
+    letter-spacing: 2px;
+  }
+  .lema {
+    font-family: 'Press Start 2P', monospace;
+    color: #ffff55;
+    font-size: clamp(9px, 1.6vw, 13px);
+    text-shadow: 2px 2px 0 #3f3f00;
+    display: inline-block;
+    margin-top: 12px;
+    transform: rotate(-4deg);
+    animation: latido 1s ease-in-out infinite alternate;
+  }
+  @keyframes latido { to { transform: rotate(-4deg) scale(1.08); } }
+  .pasto {
+    height: 28px;
+    margin-top: 40px;
+    background:
+      repeating-linear-gradient(90deg, var(--pasto) 0 12px, var(--pasto-osc) 12px 16px, var(--pasto) 16px 28px),
+      var(--pasto);
+    box-shadow: 0 8px 0 var(--pasto-osc);
+  }
+  main { max-width: 1180px; margin: 0 auto; padding: 32px 16px 60px; }
+
+  /* ---------- Paneles estilo inventario ---------- */
+  .panel {
+    background: var(--panel);
+    border: 4px solid;
+    border-color: var(--panel-borde-claro) var(--panel-borde-osc) var(--panel-borde-osc) var(--panel-borde-claro);
+    outline: 4px solid #000;
+    padding: 18px;
+    margin-bottom: 28px;
+  }
+  .panel h2 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 14px;
+    margin: 0 0 16px;
+  }
+  .barra {
+    display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between;
+  }
+  .grupo { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+  /* ---------- Botones ---------- */
+  .btn {
+    font-family: 'VT323', monospace;
+    font-size: 22px;
+    color: #fff;
+    text-shadow: 2px 2px 0 #3f3f3f;
+    background: var(--boton);
+    border: 3px solid;
+    border-color: #aaa #3a3a3a #3a3a3a #aaa;
+    outline: 2px solid #000;
+    padding: 6px 16px;
+    cursor: pointer;
+  }
+  .btn:hover { background: #7b86c9; border-color: #b6bff0 #3c4580 #3c4580 #b6bff0; }
+  .btn:active { transform: translateY(2px); }
+  .btn.verde { background: #4f8a2b; }
+  .btn.rojo { background: #a8322a; }
+  .btn.mini { font-size: 18px; padding: 2px 10px; }
+
+  select, input {
+    font-family: 'VT323', monospace;
+    font-size: 22px;
+    background: #000;
+    color: #fff;
+    border: 3px solid #a0a0a0;
+    padding: 5px 8px;
+    min-width: 0;
+  }
+  select:focus, input:focus { outline: 2px solid #ffff55; }
+  label { display: block; font-size: 20px; margin-bottom: 4px; }
+
+  .sesion { display: flex; align-items: center; gap: 10px; }
+  .estado-token { font-size: 20px; }
+  .punto { display: inline-block; width: 12px; height: 12px; margin-right: 6px; background: #a8322a; box-shadow: 0 0 0 2px #000; }
+  .punto.on { background: #55c02e; }
+
+  /* ---------- Estadisticas ---------- */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+  .stat {
+    background: #8b8b8b;
+    border: 3px solid; border-color: #373737 #fff #fff #373737;
+    padding: 10px; text-align: center; color: #fff; text-shadow: 2px 2px 0 #3f3f3f;
+  }
+  .stat b { display: block; font-family: 'Press Start 2P', monospace; font-size: 20px; margin-bottom: 6px; }
+
+  /* ---------- Tarjetas de mobs ---------- */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+  .mob {
+    background: var(--panel);
+    border: 4px solid; border-color: #fff #555 #555 #fff;
+    outline: 4px solid #000;
+    padding: 14px;
+    display: flex; flex-direction: column; gap: 10px;
+    transition: transform .12s;
+  }
+  .mob:hover { transform: translateY(-4px); }
+  .mob-top { display: flex; gap: 12px; align-items: center; }
+  .cara {
+    width: 64px; height: 64px; flex: none;
+    display: grid; grid-template-columns: repeat(8, 1fr);
+    box-shadow: 0 0 0 3px #000;
+    image-rendering: pixelated;
+  }
+  .cara i { display: block; }
+  .mob h3 {
+    font-family: 'Press Start 2P', monospace; font-size: 12px; line-height: 1.5; margin: 0 0 6px;
+    word-break: break-word;
+  }
+  .id { font-size: 18px; color: #555; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip { font-size: 18px; color: #fff; padding: 0 8px; text-shadow: 1px 1px 0 #000; box-shadow: 0 0 0 2px #000; }
+  .fila { display: flex; align-items: center; gap: 8px; font-size: 20px; }
+  .fila .lbl { width: 54px; }
+  .iconos { display: flex; flex-wrap: wrap; gap: 2px; }
+  .corazon, .espada { width: 14px; height: 14px; }
+  .acciones { display: flex; gap: 8px; margin-top: auto; }
+  .vacio { text-align: center; padding: 30px; font-size: 26px; }
+
+  /* ---------- Modales ---------- */
+  .fondo {
+    position: fixed; inset: 0; background: rgba(0,0,0,.6);
+    display: none; align-items: center; justify-content: center; padding: 16px; z-index: 10;
+  }
+  .fondo.abierto { display: flex; }
+  .modal { width: 100%; max-width: 460px; max-height: 92vh; overflow: auto; margin: 0; }
+  .campos { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .campos .ancho { grid-column: 1 / -1; }
+  .campos input, .campos select { width: 100%; }
+  .pie { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
+  .errores { color: #a8322a; margin: 12px 0 0; padding-left: 20px; font-size: 20px; }
+  .ayuda { font-size: 18px; color: #555; margin-top: 10px; }
+
+  /* ---------- Consola de peticiones ---------- */
+  .consola {
+    background: #111; color: #d0d0d0; font-size: 19px; padding: 12px;
+    max-height: 260px; overflow: auto; border: 3px solid #555;
+  }
+  .consola div { white-space: pre-wrap; word-break: break-all; border-bottom: 1px dashed #333; padding: 4px 0; }
+  .ok { color: #55ff55; } .err { color: #ff5555; } .met { color: #ffff55; }
+
+  /* ---------- Aviso (toast) ---------- */
+  .toast {
+    position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(140%);
+    background: #212121; color: #fff; border: 3px solid #555; outline: 3px solid #000;
+    padding: 10px 18px; z-index: 20; transition: transform .25s; max-width: calc(100% - 32px);
+  }
+  .toast.ver { transform: translateX(-50%) translateY(0); }
+  .toast .titulo { color: #ffff55; font-family: 'Press Start 2P', monospace; font-size: 10px; display: block; margin-bottom: 4px; }
+
+  @media (max-width: 600px) {
+    .campos { grid-template-columns: 1fr; }
+    .barra { flex-direction: column; align-items: stretch; }
+    .grupo > * { flex: 1; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>BESTIARIO</h1>
+  <h1 style="font-size:clamp(12px,2.4vw,22px);margin-top:10px">DE MINECRAFT</h1>
+  <span class="lema">¡Consumiendo la API!</span>
+  <div class="pasto"></div>
+</header>
+
+<main>
+  <section class="panel">
+    <div class="barra">
+      <div class="grupo">
+        <select id="filtroTipo" aria-label="Filtrar por tipo">
+          <option value="">Todos los tipos</option>
+          <option value="pasivo">Pasivo</option>
+          <option value="neutral">Neutral</option>
+          <option value="hostil">Hostil</option>
+          <option value="jefe">Jefe</option>
+        </select>
+        <select id="filtroDim" aria-label="Filtrar por dimensión">
+          <option value="">Todas las dimensiones</option>
+          <option value="overworld">Overworld</option>
+          <option value="nether">Nether</option>
+          <option value="end">End</option>
+        </select>
+        <input id="buscarId" type="number" min="1" placeholder="Buscar id" style="width:130px" aria-label="Buscar por id">
+        <button class="btn" id="btnBuscar">Buscar</button>
+      </div>
+      <div class="grupo">
+        <span class="estado-token" id="estadoToken"><span class="punto"></span>Sin sesión</span>
+        <button class="btn" id="btnSesion">Iniciar sesión</button>
+        <button class="btn verde" id="btnNuevo">+ Nuevo mob</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="stats" id="stats"></div>
+  </section>
+
+  <section class="grid" id="grid"></section>
+
+  <section class="panel" style="margin-top:28px">
+    <h2>Consola de peticiones</h2>
+    <div class="consola" id="consola"><div>Aquí aparece cada petición HTTP que la página hace a la API.</div></div>
+  </section>
+</main>
+
+<!-- Modal login -->
+<div class="fondo" id="modalLogin">
+  <form class="panel modal" id="formLogin">
+    <h2>Iniciar sesión</h2>
+    <div class="campos">
+      <div class="ancho"><label for="usuario">Usuario</label><input id="usuario" value="profe" autocomplete="username"></div>
+      <div class="ancho"><label for="clave">Clave</label><input id="clave" type="password" autocomplete="current-password"></div>
+    </div>
+    <ul class="errores" id="erroresLogin"></ul>
+    <p class="ayuda">El token JWT se guarda en este navegador y dura 1 hora.</p>
+    <div class="pie">
+      <button type="button" class="btn" data-cerrar>Cancelar</button>
+      <button class="btn verde">Entrar</button>
+    </div>
+  </form>
+</div>
+
+<!-- Modal crear/editar -->
+<div class="fondo" id="modalMob">
+  <form class="panel modal" id="formMob" novalidate>
+    <h2 id="tituloMob">Nuevo mob</h2>
+    <div class="campos">
+      <div class="ancho"><label for="nombre">Nombre</label><input id="nombre" maxlength="40"></div>
+      <div><label for="tipo">Tipo</label>
+        <select id="tipo">
+          <option value="pasivo">Pasivo</option>
+          <option value="neutral">Neutral</option>
+          <option value="hostil">Hostil</option>
+          <option value="jefe">Jefe</option>
+        </select>
+      </div>
+      <div><label for="dimension">Dimensión</label>
+        <select id="dimension">
+          <option value="overworld">Overworld</option>
+          <option value="nether">Nether</option>
+          <option value="end">End</option>
+        </select>
+      </div>
+      <div><label for="vida">Vida (1-1024)</label><input id="vida" type="number"></div>
+      <div><label for="dano">Daño</label><input id="dano" type="number"></div>
+    </div>
+    <ul class="errores" id="erroresMob"></ul>
+    <p class="ayuda">Los pasivos tienen daño 0 y los hostiles más de 0. La API valida todo.</p>
+    <div class="pie">
+      <button type="button" class="btn" data-cerrar>Cancelar</button>
+      <button class="btn verde" id="btnGuardar">Guardar</button>
+    </div>
+  </form>
+</div>
+
+<div class="toast" id="toast"><span class="titulo" id="toastTitulo"></span><span id="toastTexto"></span></div>
+
+<script>
+const API = '';  // misma dirección que sirve esta página
+const COLOR_TIPO = { pasivo: 'var(--pasivo)', neutral: 'var(--neutral)', hostil: 'var(--hostil)', jefe: 'var(--jefe)' };
+const COLOR_DIM = { overworld: 'var(--overworld)', nether: 'var(--nether)', end: 'var(--end)' };
+const PALETA = {
+  pasivo:  ['#f4e0c4', '#e8c79f', '#ffffff', '#6b4a2f'],
+  neutral: ['#2b2b2b', '#1a1a1a', '#c46df0', '#000000'],
+  hostil:  ['#5fbf3b', '#3e8a24', '#000000', '#2b5a18'],
+  jefe:    ['#3a3a3a', '#1e1e1e', '#d24bff', '#7a2aa3']
+};
+
+let mobs = [];
+let editandoId = null;
+let token = leer('token');
+
+function leer(k) { try { return localStorage.getItem(k); } catch { return null; } }
+function guardar(k, v) { try { v ? localStorage.setItem(k, v) : localStorage.removeItem(k); } catch {} }
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+/* ---------- Llamadas a la API (se registran en la consola) ---------- */
+async function api(metodo, ruta, cuerpo) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers.Authorization = 'Bearer ' + token;
+  const resp = await fetch(API + ruta, { method: metodo, headers, body: cuerpo ? JSON.stringify(cuerpo) : undefined });
+  let datos = null;
+  try { datos = await resp.json(); } catch {}
+  registrar(metodo, ruta, resp.status, datos);
+  if (resp.status === 401 && ruta !== '/login') cerrarSesion(false);
+  return { status: resp.status, ok: resp.ok, datos };
+}
+
+function registrar(metodo, ruta, status, datos) {
+  const linea = document.createElement('div');
+  const clase = status < 400 ? 'ok' : 'err';
+  linea.innerHTML = `<span class="met">${metodo}</span> ${esc(ruta)} → <span class="${clase}">${status}</span>  ${esc(JSON.stringify(datos))}`;
+  const c = $('consola');
+  c.prepend(linea);
+  while (c.children.length > 40) c.lastChild.remove();
+}
+
+function aviso(titulo, texto) {
+  $('toastTitulo').textContent = titulo;
+  $('toastTexto').textContent = texto;
+  $('toast').classList.add('ver');
+  clearTimeout(aviso.t);
+  aviso.t = setTimeout(() => $('toast').classList.remove('ver'), 3200);
+}
+
+/* ---------- Sesión ---------- */
+function pintarSesion() {
+  $('estadoToken').innerHTML = token
+    ? '<span class="punto on"></span>Sesión activa'
+    : '<span class="punto"></span>Sin sesión';
+  $('btnSesion').textContent = token ? 'Cerrar sesión' : 'Iniciar sesión';
+}
+function cerrarSesion(avisar = true) {
+  token = null; guardar('token', null); pintarSesion();
+  if (avisar) aviso('Sesión', 'Sesión cerrada');
+}
+function requiereSesion() {
+  if (token) return true;
+  aviso('Necesitas token', 'Inicia sesión para crear, editar o eliminar');
+  abrir('modalLogin');
+  return false;
+}
+
+/* ---------- Pintado ---------- */
+function cara(mob) {
+  // Cara pixelada de 8x8 generada a partir del nombre (siempre la misma para el mismo mob)
+  const colores = PALETA[mob.tipo] || PALETA.pasivo;
+  let h = 0;
+  for (const ch of mob.nombre) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  let pix = '';
+  for (let y = 0; y < 8; y++) {
+    for (let x = 0; x < 8; x++) {
+      const xs = x < 4 ? x : 7 - x;  // simetría horizontal
+      let c = colores[((h >> ((xs + y * 4) % 28)) & 1)];
+      if (y === 3 && (xs === 1 || xs === 2)) c = colores[2];          // ojos
+      if ((y === 5 || y === 6) && (xs === 3 || (y === 6 && xs === 2))) c = colores[3]; // boca
+      pix += `<i style="background:${c}"></i>`;
+    }
+  }
+  return `<div class="cara">${pix}</div>`;
+}
+
+const SVG_CORAZON = (relleno) => `<svg class="corazon" viewBox="0 0 7 6" shape-rendering="crispEdges"><path fill="#000" d="M1 0h2v1h1V0h2v1h1v3H6v1H5v1H2V5H1V4H0V1h1z"/><path fill="${relleno}" d="M1 1h2v1h1V1h2v2H5v1H4v1H3V4H2V3H1z"/></svg>`;
+const SVG_ESPADA = `<svg class="espada" viewBox="0 0 8 8" shape-rendering="crispEdges"><path fill="#000" d="M5 0h3v3H7v1H6v1H5v1h1v2H5V7H4V6H3v1H2v1H0V6h1V5h1V4h1V3h1V2h1z"/><path fill="#cfe6f0" d="M6 1h1v1H6v1H5v1H4v1H3V4h1V3h1V2h1z"/><path fill="#7a5a2b" d="M1 6h1v1H1z"/></svg>`;
+
+function iconos(valor, por, tope, html) {
+  const n = Math.min(Math.ceil(valor / por), tope);
+  let s = '';
+  for (let i = 0; i < n; i++) s += html(i);
+  if (Math.ceil(valor / por) > tope) s += `<span>+</span>`;
+  return s;
+}
+
+function tarjeta(m) {
+  const corazones = iconos(m.vida, 2, 10, i => SVG_CORAZON(m.vida >= (i + 1) * 2 ? '#e3271b' : '#7a1c16'));
+  const espadas = m.dano === 0 ? '<span>—</span>' : iconos(m.dano, 1, 10, () => SVG_ESPADA);
+  return `
+    <article class="mob">
+      <div class="mob-top">
+        ${cara(m)}
+        <div>
+          <h3>${esc(m.nombre)}</h3>
+          <div class="id">id #${m.id}</div>
+        </div>
+      </div>
+      <div class="chips">
+        <span class="chip" style="background:${COLOR_TIPO[m.tipo]}">${esc(m.tipo)}</span>
+        <span class="chip" style="background:${COLOR_DIM[m.dimension]}">${esc(m.dimension)}</span>
+      </div>
+      <div class="fila"><span class="lbl">Vida</span><span class="iconos">${corazones}</span><b>${m.vida}</b></div>
+      <div class="fila"><span class="lbl">Daño</span><span class="iconos">${espadas}</span><b>${m.dano}</b></div>
+      <div class="acciones">
+        <button class="btn mini" data-editar="${m.id}">Editar</button>
+        <button class="btn mini rojo" data-eliminar="${m.id}">Eliminar</button>
+      </div>
+    </article>`;
+}
+
+function pintar(lista) {
+  $('grid').innerHTML = lista.length
+    ? lista.map(tarjeta).join('')
+    : '<div class="panel vacio" style="grid-column:1/-1">No hay mobs aquí. ¡Crea el primero!</div>';
+
+  const cuenta = t => mobs.filter(m => m.tipo === t).length;
+  const prom = mobs.length ? Math.round(mobs.reduce((a, m) => a + m.vida, 0) / mobs.length) : 0;
+  $('stats').innerHTML = [
+    ['Mobs', mobs.length], ['Pasivos', cuenta('pasivo')], ['Neutrales', cuenta('neutral')],
+    ['Hostiles', cuenta('hostil')], ['Jefes', cuenta('jefe')], ['Vida prom.', prom]
+  ].map(([t, v]) => `<div class="stat"><b>${v}</b>${t}</div>`).join('');
+}
+
+/* ---------- Operaciones ---------- */
+async function cargar() {
+  const q = new URLSearchParams();
+  if ($('filtroTipo').value) q.set('tipo', $('filtroTipo').value);
+  if ($('filtroDim').value) q.set('dimension', $('filtroDim').value);
+  try {
+    const r = await api('GET', '/mobs' + (q.toString() ? '?' + q : ''));
+    const filtrado = q.toString() !== '';
+    if (filtrado) {
+      const todos = await fetch(API + '/mobs').then(x => x.json());
+      mobs = todos;
+    } else {
+      mobs = r.datos;
+    }
+    pintar(r.datos);
+  } catch {
+    $('grid').innerHTML = '<div class="panel vacio" style="grid-column:1/-1">No se pudo conectar con la API. ¿Está corriendo <b>python main.py</b>?</div>';
+  }
+}
+
+async function buscarPorId() {
+  const id = $('buscarId').value;
+  if (!id) return cargar();
+  const r = await api('GET', '/mobs/' + id);
+  if (r.ok) pintar([r.datos]);
+  else { aviso('Error ' + r.status, r.datos?.error || 'No encontrado'); pintar([]); }
+}
+
+function abrir(id) { $(id).classList.add('abierto'); }
+function cerrar(id) { $(id).classList.remove('abierto'); }
+
+function abrirFormulario(mob) {
+  if (!requiereSesion()) return;
+  editandoId = mob ? mob.id : null;
+  $('tituloMob').textContent = mob ? `Editar mob #${mob.id}` : 'Nuevo mob';
+  $('nombre').value = mob?.nombre ?? '';
+  $('tipo').value = mob?.tipo ?? 'hostil';
+  $('dimension').value = mob?.dimension ?? 'overworld';
+  $('vida').value = mob?.vida ?? 20;
+  $('dano').value = mob?.dano ?? 3;
+  $('erroresMob').innerHTML = '';
+  abrir('modalMob');
+  $('nombre').focus();
+}
+
+$('formMob').addEventListener('submit', async e => {
+  e.preventDefault();
+  const num = v => (v.trim() === '' || isNaN(v) ? v : Number(v));
+  const cuerpo = {
+    nombre: $('nombre').value,
+    tipo: $('tipo').value,
+    vida: num($('vida').value),
+    dano: num($('dano').value),
+    dimension: $('dimension').value
+  };
+  const r = editandoId
+    ? await api('PUT', '/mobs/' + editandoId, cuerpo)
+    : await api('POST', '/mobs', cuerpo);
+  if (r.ok) {
+    cerrar('modalMob');
+    aviso(editandoId ? 'Actualizado' : 'Creado', `${r.datos.mob.nombre} guardado`);
+    cargar();
+  } else {
+    const lista = r.datos?.detalles || [r.datos?.error || 'Error ' + r.status];
+    $('erroresMob').innerHTML = lista.map(x => `<li>${esc(x)}</li>`).join('');
+    if (r.status === 401) { cerrar('modalMob'); abrir('modalLogin'); }
+  }
+});
+
+$('formLogin').addEventListener('submit', async e => {
+  e.preventDefault();
+  const r = await api('POST', '/login', { usuario: $('usuario').value, clave: $('clave').value });
+  if (r.ok) {
+    token = r.datos.token; guardar('token', token); pintarSesion();
+    cerrar('modalLogin'); $('clave').value = ''; $('erroresLogin').innerHTML = '';
+    aviso('Bienvenido', 'Token JWT obtenido');
+  } else {
+    $('erroresLogin').innerHTML = `<li>${esc(r.datos?.error || 'Error')}</li>`;
+  }
+});
+
+$('grid').addEventListener('click', async e => {
+  const ed = e.target.dataset.editar, el = e.target.dataset.eliminar;
+  if (ed) abrirFormulario(mobs.find(m => m.id == ed));
+  if (el) {
+    if (!requiereSesion()) return;
+    const mob = mobs.find(m => m.id == el);
+    if (!confirm(`¿Eliminar a ${mob ? mob.nombre : 'este mob'}?`)) return;
+    const r = await api('DELETE', '/mobs/' + el);
+    if (r.ok) { aviso('Eliminado', `Mob #${el} eliminado`); cargar(); }
+    else aviso('Error ' + r.status, r.datos?.error || '');
+  }
+});
+
+document.querySelectorAll('[data-cerrar]').forEach(b => b.addEventListener('click', () => b.closest('.fondo').classList.remove('abierto')));
+document.querySelectorAll('.fondo').forEach(f => f.addEventListener('click', e => { if (e.target === f) f.classList.remove('abierto'); }));
+document.addEventListener('keydown', e => { if (e.key === 'Escape') document.querySelectorAll('.fondo.abierto').forEach(f => f.classList.remove('abierto')); });
+
+$('btnSesion').addEventListener('click', () => token ? cerrarSesion() : abrir('modalLogin'));
+$('btnNuevo').addEventListener('click', () => abrirFormulario(null));
+$('btnBuscar').addEventListener('click', buscarPorId);
+$('buscarId').addEventListener('keydown', e => { if (e.key === 'Enter') buscarPorId(); });
+$('filtroTipo').addEventListener('change', () => { $('buscarId').value = ''; cargar(); });
+$('filtroDim').addEventListener('change', () => { $('buscarId').value = ''; cargar(); });
+
+pintarSesion();
+cargar();
+</script>
+</body>
+</html>
