@@ -1,81 +1,82 @@
-# API de Mobs de Minecraft
+# ApiBestarioMinecraft · API de Mobs de Minecraft (versión segura, MongoDB)
 
 ## Temática
-La API administra un catálogo de **mobs (criaturas) de Minecraft**: su nombre, su tipo de
-comportamiento, sus puntos de vida, el daño que hacen y la dimensión donde aparecen.
-Los datos se guardan en SQLite (`minecraft.db`, se crea sola al arrancar).
+La API administra un catálogo de **mobs (criaturas) de Minecraft**: nombre, tipo de
+comportamiento, vida, daño y dimensión donde aparecen. Incluye un **simulador de combate**.
+Los datos se guardan en **MongoDB** (colección `mobs`).
 
 ## Instalación y ejecución
+Necesitas Python y un MongoDB (local: *MongoDB Community Server*, o en la nube: *MongoDB Atlas*).
+
 ```bash
 python -m venv .venv
 .venv\Scripts\activate          # Windows  (Linux/Mac: source .venv/bin/activate)
 pip install -r requirements.txt
+
+python crear_env.py             # crea .env con secretos aleatorios y MUESTRA la clave de "profe" una sola vez
+python migrar_sqlite_a_mongo.py # (una vez) copia los mobs de minecraft.db a MongoDB
 python main.py
 ```
-La API queda en `http://127.0.0.1:5000`. Para que el docente la consuma desde otro equipo
-de la misma red, usar `http://<IP-de-tu-PC>:5000` (ver la IP con `ipconfig`).
+- La API queda en `http://127.0.0.1:5000` y la interfaz en `http://127.0.0.1:5000/panel`.
+- Con Atlas, pon tu cadena en `MONGO_URI` dentro de `.env`.
+- Para que el docente se conecte desde otro equipo, cambia en `.env` `HOST=0.0.0.0` y reinicia;
+  él usa `http://<IP-de-tu-PC>:5000`. Vuelve a `127.0.0.1` al terminar.
+- En Postman, guarda en la variable `clave` la contraseña que mostró `crear_env.py`.
 
-## Interfaz web
-Con el servidor corriendo, abrir **`http://127.0.0.1:5000/panel`** en el navegador.
-Es una página estilo Minecraft que consume la misma API con `fetch`. Desde ahí se puede:
-- iniciar sesión (obtiene el token JWT)
-- listar y filtrar los mobs por tipo o dimensión, y buscarlos por id
-- crear, editar y eliminar mobs
-
-Los errores de validación que devuelve la API se muestran en el formulario. Abajo hay una
-*consola de peticiones* que muestra cada método, ruta, código HTTP y respuesta JSON.
-
-## Tabla `mobs`
-| Campo      | Tipo SQLite | Descripción                                   |
-|------------|-------------|-----------------------------------------------|
-| id         | INTEGER     | Autoincremental (clave primaria)              |
-| nombre     | TEXT        | Nombre del mob, obligatorio y único           |
-| tipo       | TEXT        | `pasivo`, `neutral`, `hostil` o `jefe`        |
-| vida       | INTEGER     | Puntos de vida (1 a 1024)                      |
-| dano       | INTEGER     | Daño de ataque (0 o más)                       |
-| dimension  | TEXT        | `overworld`, `nether` o `end`                 |
+## Colecciones de MongoDB
+| Colección | Qué guarda |
+|---|---|
+| `mobs` | `_id` (número 1, 2, 3…, se muestra como `id`), `nombre` (único, sin distinguir mayúsculas), `tipo`, `vida`, `dano`, `dimension` |
+| `contadores` | Contador atómico para los ids numéricos |
+| `usuarios` | Usuario y **hash** de su clave (nunca la clave) |
+| `tokens_revocados` | Tokens cerrados con `/logout`; MongoDB los borra solo al vencer |
 
 ## Reglas de validación
-- Todos los campos son obligatorios; `nombre`, `tipo`, `dimension` deben ser texto y `vida`, `dano` números enteros.
-- `tipo` solo puede ser: pasivo, neutral, hostil, jefe.
-- `dimension` solo puede ser: overworld, nether, end.
-- `vida` debe estar entre 1 y 1024 (límite de vida de una entidad en Minecraft).
-- `dano` no puede ser negativo.
-- **Regla propia:** un mob `pasivo` no ataca → su `dano` debe ser 0.
-- **Regla propia:** un mob `hostil` siempre ataca → su `dano` debe ser mayor que 0.
-- No puede haber dos mobs con el mismo nombre.
+- Todos los campos son obligatorios; `nombre`, `tipo`, `dimension` son texto y `vida`, `dano` enteros.
+- `nombre`: máximo 40 caracteres, sin caracteres de control.
+- `tipo`: pasivo, neutral, hostil o jefe. `dimension`: overworld, nether o end.
+- `vida` entre 1 y 1024. `dano` entre 0 y 1000.
+- **Regla propia:** un mob `pasivo` no ataca → `dano` = 0.
+- **Regla propia:** un mob `hostil` siempre ataca → `dano` > 0.
+- No puede haber dos mobs con el mismo nombre (ignora mayúsculas).
 
 ## Rutas
-| Método | Ruta          | Token | Descripción                                           |
-|--------|---------------|-------|-------------------------------------------------------|
-| GET    | `/`           | No    | Bienvenida y lista de rutas (JSON)                    |
-| GET    | `/panel`      | No    | Interfaz web que consume la API                       |
-| POST   | `/login`      | No    | Devuelve el token JWT (`{"usuario":"profe","clave":"cloud2026"}`) |
-| GET    | `/mobs`       | No    | Lista todos los mobs. Filtros opcionales: `?tipo=hostil&dimension=nether` |
-| GET    | `/mobs/<id>`  | No    | Consulta un mob por id                                |
-| POST   | `/mobs`       | Sí    | Crea un mob                                           |
-| PUT    | `/mobs/<id>`  | Sí    | Actualiza un mob (se envían todos los campos)         |
-| DELETE | `/mobs/<id>`  | Sí    | Elimina un mob                                        |
+| Método | Ruta | Token | Descripción |
+|---|---|---|---|
+| GET | `/` | No | Bienvenida y lista de rutas |
+| GET | `/panel` | No | Interfaz web |
+| POST | `/login` | No | Devuelve el token JWT (`{"usuario":"profe","clave":"..."}`) |
+| POST | `/logout` | Sí | Cierra la sesión e invalida el token |
+| GET | `/mobs` | No | Lista mobs. Filtros: `?tipo=hostil&dimension=nether` |
+| GET | `/mobs/<id>` | No | Consulta un mob |
+| POST | `/mobs` | Sí | Crea un mob |
+| PUT | `/mobs/<id>` | Sí | Actualiza un mob (se envían todos los campos) |
+| DELETE | `/mobs/<id>` | Sí | Elimina un mob |
+| POST | `/combate` | No | Simula un combate: `{"mob1": 1, "mob2": 2}` |
 
-El token se envía en el encabezado: `Authorization: Bearer <token>` (dura 1 hora).
-
-### Ejemplo de cuerpo (POST / PUT)
-```json
-{ "nombre": "Creeper", "tipo": "hostil", "vida": 20, "dano": 49, "dimension": "overworld" }
-```
+## Simulador de combate
+Cada ronda ataca primero el `mob1` y luego el `mob2`; pierde quien llegue a 0 de vida primero.
+Si ninguno puede dañar al otro (ambos con daño 0) es empate. Responde con el ganador, las rondas,
+la vida restante y una bitácora (máximo 20 eventos). Errores: 400 (ids inválidos o el mismo mob
+dos veces) y 404 (algún id no existe). No modifica datos, por eso no pide token.
 
 ## Códigos de respuesta
-| Código | Cuándo                                                        |
-|--------|---------------------------------------------------------------|
-| 200    | Consulta, actualización o eliminación correcta                |
-| 201    | Mob creado                                                    |
-| 400    | Datos inválidos (incluye la lista `detalles` con cada error)  |
-| 401    | Token ausente, inválido o expirado / login incorrecto         |
-| 404    | El mob con ese id no existe                                   |
+200 OK · 201 creado · 400 datos inválidos · 401 token ausente, falso, vencido o revocado
+(o clave incorrecta) · 404 no encontrado · 405 método no permitido · 413 cuerpo muy grande ·
+429 demasiados intentos · 503 MongoDB no disponible.
 
-## Pruebas en Postman
-Importar `Minecraft_Mobs.postman_collection.json`. Ejecutar primero **Login** (guarda el token
-automáticamente en la variable `token`) y luego el resto en orden: crear 2 mobs, listar,
-consultar, actualizar uno, eliminar otro, listar de nuevo (el otro permanece) y las 3 pruebas
-de error. Para comprobar la persistencia: detener el servidor (Ctrl+C), volver a ejecutar
-`python main.py` y hacer **Listar mobs**: los datos siguen ahí porque están en `minecraft.db`.
+## Seguridad
+Ver `AUDITORIA_SEGURIDAD.md` (hallazgos, pruebas y medidas aplicadas).
+
+## Colaboradores
+
+Esta lista **se actualiza sola**: muestra a todas las personas que han hecho al menos un commit
+en el repositorio, con su foto de GitHub y un enlace a su perfil.
+
+[![Colaboradores](https://contrib.rocks/image?repo=Nicky2609/ApiBestarioMinecraft)](https://github.com/Nicky2609/ApiBestarioMinecraft/graphs/contributors)
+
+| Integrante | GitHub | Rol |
+|---|---|---|
+| Nicky | [@Nicky2609](https://github.com/Nicky2609) | Autor del repositorio |
+
+> Cuando un compañero se una, se añade una fila a la tabla con su usuario de GitHub.
